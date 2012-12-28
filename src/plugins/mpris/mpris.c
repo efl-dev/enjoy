@@ -422,7 +422,7 @@ _mpris_append_dict_entry(EDBus_Message_Iter *array, const char *key,
    edbus_message_iter_arguments_append(array, "{sv}", &dict);
    edbus_message_iter_basic_append(dict, 's', key);
    val = edbus_message_iter_container_new(dict, 'v', value_type);
-   edbus_message_iter_arguments_vset(val, value_type, ap);
+   edbus_message_iter_arguments_vappend(val, value_type, ap);
    edbus_message_iter_container_close(dict, val);
    edbus_message_iter_container_close(array, dict);
    va_end(ap);
