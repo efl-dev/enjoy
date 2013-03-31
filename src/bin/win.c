@@ -1020,7 +1020,6 @@ win_new(App *app)
      (nowplaying_edje, "ejy,shuffle,on", "ejy", _win_shuffle_on, w);
    edje_object_signal_callback_add
      (nowplaying_edje, "ejy,shuffle,off", "ejy", _win_shuffle_off, w);
-   elm_object_part_content_set(w->layout, "ejy.swallow.nowplaying", w->nowplaying);
    edje_object_size_min_get(w->edje, &(w->min.w), &(w->min.h));
    edje_object_size_min_restricted_calc
      (w->edje, &(w->min.w), &(w->min.h), w->min.w, w->min.h);
