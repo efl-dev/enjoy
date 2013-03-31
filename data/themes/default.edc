@@ -503,7 +503,7 @@ collections {
          part {
             name: "buttons.repeat";
             type: EXTERNAL;
-            source: "elm/toggle";
+            source: "elm/check";
             description {
                state: "default" 0.0;
                align: 0.0 0.0;
@@ -521,12 +521,13 @@ collections {
                }
                params.string: "label on" "Repeat ON";
                params.string: "label off" "Repeat OFF";
+               params.string: "style" "toggle";
             }
          }
          part {
             name: "buttons.shuffle";
             type: EXTERNAL;
-            source: "elm/toggle";
+            source: "elm/check";
             description {
                state: "default" 0.0;
                align: 1.0 0.0;
@@ -544,6 +545,7 @@ collections {
                }
                params.string: "label on" "Shuffle ON";
                params.string: "label off" "Shuffle OFF";
+               params.string: "style" "toggle";
             }
          }
 
