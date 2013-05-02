@@ -1,5 +1,5 @@
 #include <Eina.h>
-#include <EDBus.h>
+#include <Eldbus.h>
 #include <Ecore.h>
 
 #include "plugin.h"
@@ -58,34 +58,34 @@ static void _mpris_signal_player_status_change(int playback, int shuffle, int re
 static void _mpris_signal_player_track_change(const Song *song);
 static void _mpris_signal_tracklist_tracklist_change(int size);
 
-static void _mpris_append_dict_entry(EDBus_Message_Iter *array, const char *key, const char  *value_type, ...);
-static EDBus_Message *_mpris_player_next(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_previous(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_pause(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_stop(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_play(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_seek(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_root_identity(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_root_quit(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_root_version(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_caps_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_volume_set(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_volume_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_repeat_set(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_status_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_position_set(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_player_position_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_song_metadata_reply(const EDBus_Message *msg, const Song *song);
-static EDBus_Message *_mpris_player_metadata_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_tracklist_current_track_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_tracklist_count(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_tracklist_metadata_get(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
-static EDBus_Message *_mpris_tracklist_shuffle_set(const EDBus_Service_Interface *iface, const EDBus_Message *msg);
+static void _mpris_append_dict_entry(Eldbus_Message_Iter *array, const char *key, const char  *value_type, ...);
+static Eldbus_Message *_mpris_player_next(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_previous(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_pause(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_stop(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_play(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_seek(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_root_identity(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_root_quit(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_root_version(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_caps_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_volume_set(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_volume_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_repeat_set(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_status_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_position_set(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_player_position_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_song_metadata_reply(const Eldbus_Message *msg, const Song *song);
+static Eldbus_Message *_mpris_player_metadata_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_tracklist_current_track_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_tracklist_count(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_tracklist_metadata_get(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
+static Eldbus_Message *_mpris_tracklist_shuffle_set(const Eldbus_Service_Interface *iface, const Eldbus_Message *msg);
 
-static void _cb_dbus_request_name(void *data, const EDBus_Message *msg, EDBus_Pending *pending);
+static void _cb_dbus_request_name(void *data, const Eldbus_Message *msg, Eldbus_Pending *pending);
 
-static EDBus_Connection *conn = NULL;
-static EDBus_Service_Interface *root, *player, *tracklist;
+static Eldbus_Connection *conn = NULL;
+static Eldbus_Service_Interface *root, *player, *tracklist;
 static Eina_List *ev_handlers = NULL;
 
 enum
@@ -95,13 +95,13 @@ enum
    PLAYER_CAPS
 };
 
-static const EDBus_Signal mpris_player_signals[] = {
+static const Eldbus_Signal mpris_player_signals[] = {
    /* Emitted whenever a new song is played; gives the song metadata */
-   [PLAYER_TRACK] = { "TrackChange",  EDBUS_ARGS({"a{sv}", ""}), 0 },
+   [PLAYER_TRACK] = { "TrackChange",  ELDBUS_ARGS({"a{sv}", ""}), 0 },
    /* Emitted whenever player's status changes */
-   [PLAYER_STATUS] = { "StatusChange", EDBUS_ARGS({"(iiii)", ""}), 0 },
+   [PLAYER_STATUS] = { "StatusChange", ELDBUS_ARGS({"(iiii)", ""}), 0 },
    /* Emitted whenever player's capabilities changes */
-   [PLAYER_CAPS] = { "CapsChange", EDBUS_ARGS({"i", ""}), 0 },
+   [PLAYER_CAPS] = { "CapsChange", ELDBUS_ARGS({"i", ""}), 0 },
    {  }
 };
 
@@ -110,27 +110,27 @@ enum
    TRACK_LIST = 0,
 };
 
-static const EDBus_Signal mpris_tracklist_signals[] = {
+static const Eldbus_Signal mpris_tracklist_signals[] = {
    /* Emitted whenever the tracklist changes; gives the number of items */
-   [TRACK_LIST] = { "TrackListChange", EDBUS_ARGS({"i", ""}), 0 },
+   [TRACK_LIST] = { "TrackListChange", ELDBUS_ARGS({"i", ""}), 0 },
    {  }
 };
 
-static const EDBus_Method mpris_root_methods[] = {
+static const Eldbus_Method mpris_root_methods[] = {
    /* Returns a string representing the player name */
    {
-    "Identity", NULL, EDBUS_ARGS({"s", "name"}), _mpris_root_identity, 0
+    "Identity", NULL, ELDBUS_ARGS({"s", "name"}), _mpris_root_identity, 0
    },
    /* Quits the player */
    { "Quit", NULL, NULL, _mpris_root_quit, 0 },
    /* Returns a tuple containing the version of MPRIS protocol implemented */
    {
-    "MprisVersion", NULL, EDBUS_ARGS({"(qq)", ""}), _mpris_root_version, 0
+    "MprisVersion", NULL, ELDBUS_ARGS({"(qq)", ""}), _mpris_root_version, 0
    },
    { }
 };
 
-static const EDBus_Method mpris_player_methods[] = {
+static const Eldbus_Method mpris_player_methods[] = {
    /* Goes to the next song */
    {
     "Next", NULL, NULL, _mpris_player_next, 0
@@ -153,68 +153,68 @@ static const EDBus_Method mpris_player_methods[] = {
    },
    /* Seek the current song by given miliseconds */
    {
-    "Seek", EDBUS_ARGS({"x", "time"}), NULL, _mpris_player_seek, 0
+    "Seek", ELDBUS_ARGS({"x", "time"}), NULL, _mpris_player_seek, 0
    },
    /* Toggle the current track repeat */
    {
-    "Repeat", EDBUS_ARGS({"b", ""}), NULL, _mpris_player_repeat_set, 0
+    "Repeat", ELDBUS_ARGS({"b", ""}), NULL, _mpris_player_repeat_set, 0
    },
    /* Return the status of the media player */
    {
-    "GetStatus", NULL, EDBUS_ARGS({"(iiii)", ""}), _mpris_player_status_get, 0
+    "GetStatus", NULL, ELDBUS_ARGS({"(iiii)", ""}), _mpris_player_status_get, 0
    },
    /* Gets all the metadata for the currently played element */
    {
-    "GetMetadata", NULL, EDBUS_ARGS({"a{sv}", "data"}),
+    "GetMetadata", NULL, ELDBUS_ARGS({"a{sv}", "data"}),
     _mpris_player_metadata_get, 0
    },
    /* Returns the media player's current capabilities */
    {
-    "GetCaps", NULL, EDBUS_ARGS({"i", ""}), _mpris_player_caps_get, 0
+    "GetCaps", NULL, ELDBUS_ARGS({"i", ""}), _mpris_player_caps_get, 0
    },
    /* Sets the volume */
    {
-    "VolumeSet", EDBUS_ARGS({"i", ""}), NULL, _mpris_player_volume_set, 0
+    "VolumeSet", ELDBUS_ARGS({"i", ""}), NULL, _mpris_player_volume_set, 0
    },
    /* Gets the current volume */
    {
-    "VolumeGet", NULL, EDBUS_ARGS({"i", ""}), _mpris_player_volume_get, 0
+    "VolumeGet", NULL, ELDBUS_ARGS({"i", ""}), _mpris_player_volume_get, 0
    },
    /* Sets the playing position (in ms) */
    {
-    "PositionSet", EDBUS_ARGS({"i", ""}), NULL, _mpris_player_position_set, 0
+    "PositionSet", ELDBUS_ARGS({"i", ""}), NULL, _mpris_player_position_set, 0
    },
    /* Gets the playing position (in ms) */
    {
-    "PositionGet", NULL, EDBUS_ARGS({"i", ""}), _mpris_player_position_get, 0
+    "PositionGet", NULL, ELDBUS_ARGS({"i", ""}), _mpris_player_position_get, 0
    },
    { }
 };
 
-static const EDBus_Method mpris_tracklist_methods[] = {
+static const Eldbus_Method mpris_tracklist_methods[] = {
    /* Gives all the metadata available at the given position in the track list */
    {
-    "GetMetadata", EDBUS_ARGS({"i", ""}), EDBUS_ARGS({"a{sv}", ""}),
+    "GetMetadata", ELDBUS_ARGS({"i", ""}), ELDBUS_ARGS({"a{sv}", ""}),
     _mpris_tracklist_metadata_get, 0
    },
    /* Returns the position of the current URI in the track list */
    {
-    "GetCurrentTrack", NULL, EDBUS_ARGS({"i", ""}),
+    "GetCurrentTrack", NULL, ELDBUS_ARGS({"i", ""}),
     _mpris_tracklist_current_track_get, 0
    },
    /* Returns the number of elements in the track list */
    {
-    "GetLength", NULL, EDBUS_ARGS({"i", ""}), _mpris_tracklist_count, 0
+    "GetLength", NULL, ELDBUS_ARGS({"i", ""}), _mpris_tracklist_count, 0
    },
    /* Appends an URI to the track list */
-   /*{ "AddTrack", EDBUS_ARGS({"sb", ""}), EDBUS_ARGS({"i", ""}), NULL, 0 },*/
+   /*{ "AddTrack", ELDBUS_ARGS({"sb", ""}), ELDBUS_ARGS({"i", ""}), NULL, 0 },*/
    /* Removes an URL from the track list */
-   /*{ "DelTrack", EDBUS_ARGS({"i", ""}), NULL, NULL, 0 },*/
+   /*{ "DelTrack", ELDBUS_ARGS({"i", ""}), NULL, NULL, 0 },*/
    /* Toggle playlist loop */
-   /*{ "SetLoop", EDBUS_ARGS({"b", ""}), NULL, NULL, 0 },*/
+   /*{ "SetLoop", ELDBUS_ARGS({"b", ""}), NULL, NULL, 0 },*/
    /* Toggle playlist shuffle/random */
    {
-    "SetRandom", EDBUS_ARGS({"b", ""}), NULL, _mpris_tracklist_shuffle_set, 0
+    "SetRandom", ELDBUS_ARGS({"b", ""}), NULL, _mpris_tracklist_shuffle_set, 0
    },
    { }
 };
@@ -279,8 +279,8 @@ mpris_enable(Enjoy_Plugin *p __UNUSED__)
               _cb_player_tracklist_change, NULL);
 #undef EV_HANDLER
 
-   edbus_name_request(conn, APPLICATION_NAME,
-                      EDBUS_NAME_REQUEST_FLAG_DO_NOT_QUEUE,
+   eldbus_name_request(conn, APPLICATION_NAME,
+                      ELDBUS_NAME_REQUEST_FLAG_DO_NOT_QUEUE,
                       _cb_dbus_request_name, NULL);
    return EINA_TRUE;
 }
@@ -292,9 +292,9 @@ mpris_disable(Enjoy_Plugin *p __UNUSED__)
 
    if (root)
      {
-        edbus_service_object_unregister(root);
-        edbus_service_object_unregister(tracklist);
-        edbus_service_object_unregister(player);
+        eldbus_service_object_unregister(root);
+        eldbus_service_object_unregister(tracklist);
+        eldbus_service_object_unregister(player);
         root = NULL;
         tracklist = NULL;
         player = NULL;
@@ -335,8 +335,8 @@ mpris_init(void)
 
    if (conn) return EINA_TRUE;
 
-   edbus_init();
-   conn = edbus_connection_get(EDBUS_CONNECTION_TYPE_SESSION);
+   eldbus_init();
+   conn = eldbus_connection_get(ELDBUS_CONNECTION_TYPE_SESSION);
    if (!conn)
      {
         ERR("Could not get DBus session bus");
@@ -358,8 +358,8 @@ mpris_shutdown(void)
 {
    if (!conn) return;
 
-   edbus_connection_unref(conn);
-   edbus_shutdown();
+   eldbus_connection_unref(conn);
+   eldbus_shutdown();
    conn = NULL;
 
    if (_mpris_log_domain >= 0)
@@ -369,69 +369,69 @@ mpris_shutdown(void)
      }
 }
 
-static const EDBus_Service_Interface_Desc root_desc = {
+static const Eldbus_Service_Interface_Desc root_desc = {
    PLAYER_INTERFACE_NAME, mpris_root_methods
 };
 
-static const EDBus_Service_Interface_Desc player_desc = {
+static const Eldbus_Service_Interface_Desc player_desc = {
    PLAYER_INTERFACE_NAME, mpris_player_methods, mpris_player_signals
 };
 
-static const EDBus_Service_Interface_Desc tracklist_desc = {
+static const Eldbus_Service_Interface_Desc tracklist_desc = {
    PLAYER_INTERFACE_NAME, mpris_tracklist_methods, mpris_tracklist_signals
 };
 
 static void
-_cb_dbus_request_name(void *data __UNUSED__, const EDBus_Message *msg, EDBus_Pending *pending __UNUSED__)
+_cb_dbus_request_name(void *data __UNUSED__, const Eldbus_Message *msg, Eldbus_Pending *pending __UNUSED__)
 {
    const char *error_name, *error_txt;
    unsigned flag;
 
-   if (edbus_message_error_get(msg, &error_name, &error_txt))
+   if (eldbus_message_error_get(msg, &error_name, &error_txt))
      {
         ERR("Error %s %s", error_name, error_txt);
         return;
      }
 
-   if (!edbus_message_arguments_get(msg, "u", &flag))
+   if (!eldbus_message_arguments_get(msg, "u", &flag))
      {
         ERR("Error getting arguments.");
         return;
      }
 
-   if (flag != EDBUS_NAME_REQUEST_REPLY_PRIMARY_OWNER)
+   if (flag != ELDBUS_NAME_REQUEST_REPLY_PRIMARY_OWNER)
      {
         ERR("Bus name in use by another application.");
         return;
      }
 
-   root = edbus_service_interface_register(conn, ROOT_NAME, &root_desc);
-   player = edbus_service_interface_register(conn, PLAYER_NAME, &player_desc);
-   tracklist = edbus_service_interface_register(conn, TRACKLIST_NAME,
+   root = eldbus_service_interface_register(conn, ROOT_NAME, &root_desc);
+   player = eldbus_service_interface_register(conn, PLAYER_NAME, &player_desc);
+   tracklist = eldbus_service_interface_register(conn, TRACKLIST_NAME,
                                                 &tracklist_desc);
 }
 
 static void
-_mpris_append_dict_entry(EDBus_Message_Iter *array, const char *key,
+_mpris_append_dict_entry(Eldbus_Message_Iter *array, const char *key,
                          const char  *value_type, ...)
 {
-   EDBus_Message_Iter *dict, *val;
+   Eldbus_Message_Iter *dict, *val;
    va_list ap;
 
    va_start(ap, value_type);
-   edbus_message_iter_arguments_append(array, "{sv}", &dict);
-   edbus_message_iter_basic_append(dict, 's', key);
-   val = edbus_message_iter_container_new(dict, 'v', value_type);
-   edbus_message_iter_arguments_vappend(val, value_type, ap);
-   edbus_message_iter_container_close(dict, val);
-   edbus_message_iter_container_close(array, dict);
+   eldbus_message_iter_arguments_append(array, "{sv}", &dict);
+   eldbus_message_iter_basic_append(dict, 's', key);
+   val = eldbus_message_iter_container_new(dict, 'v', value_type);
+   eldbus_message_iter_arguments_vappend(val, value_type, ap);
+   eldbus_message_iter_container_close(dict, val);
+   eldbus_message_iter_container_close(array, dict);
    va_end(ap);
 }
 
 static void
-_mpris_message_fill_song_metadata(EDBus_Message *msg, const Song *song)
+_mpris_message_fill_song_metadata(Eldbus_Message *msg, const Song *song)
 {
-   EDBus_Message_Iter *array, *main_iter;
+   Eldbus_Message_Iter *array, *main_iter;
 
    if (!song) return;
 
@@ -445,8 +445,8 @@ _mpris_message_fill_song_metadata(EDBus_Message *msg, const Song *song)
      trackno s
    */
 
-   main_iter = edbus_message_iter_get(msg);
-   edbus_message_iter_arguments_append(main_iter, "a{sv}", &array);
+   main_iter = eldbus_message_iter_get(msg);
+   eldbus_message_iter_arguments_append(main_iter, "a{sv}", &array);
 
    if (song->title)
      _mpris_append_dict_entry(array, "title", "s", song->title);
@@ -461,7 +461,7 @@ _mpris_message_fill_song_metadata(EDBus_Message *msg, const Song *song)
    _mpris_append_dict_entry(array, "enjoy:playcount", "i", song->playcnt);
    _mpris_append_dict_entry(array, "enjoy:filesize", "i", song->size);
 
-   edbus_message_iter_container_close(main_iter, array);
+   eldbus_message_iter_container_close(main_iter, array);
 }
 
 void
@@ -471,7 +471,7 @@ _mpris_signal_player_caps_change(int caps)
    if (caps != old_caps)
      {
         int32_t caps32 = caps;
-        edbus_service_signal_emit(player, PLAYER_CAPS, caps32);
+        eldbus_service_signal_emit(player, PLAYER_CAPS, caps32);
         old_caps = caps;
      }
 }
@@ -479,8 +479,8 @@ _mpris_signal_player_caps_change(int caps)
 static void
 _mpris_signal_player_status_change(int playback, int shuffle, int repeat, int endless)
 {
-   EDBus_Message *sig;
-   EDBus_Message_Iter *st, *main_iter;
+   Eldbus_Message *sig;
+   Eldbus_Message_Iter *st, *main_iter;
    static int old_playback = 0, old_shuffle = 0, old_repeat = 0, old_endless = 0;
 
    if (old_playback == playback && old_shuffle == shuffle &&
@@ -490,18 +490,18 @@ _mpris_signal_player_status_change(int playback, int shuffle, int repeat, int en
    old_repeat = repeat;
    old_endless = endless;
 
-   sig = edbus_service_signal_new(player, PLAYER_STATUS);
+   sig = eldbus_service_signal_new(player, PLAYER_STATUS);
    if (!sig) return;
 
-   main_iter = edbus_message_iter_get(sig);
-   edbus_message_iter_arguments_append(main_iter, "(iiii)", &st);
-   edbus_message_iter_basic_append(st, 'i', playback);
-   edbus_message_iter_basic_append(st, 'i', shuffle);
-   edbus_message_iter_basic_append(st, 'i', repeat);
-   edbus_message_iter_basic_append(st, 'i', endless);
-   edbus_message_iter_container_close(main_iter, st);
+   main_iter = eldbus_message_iter_get(sig);
+   eldbus_message_iter_arguments_append(main_iter, "(iiii)", &st);
+   eldbus_message_iter_basic_append(st, 'i', playback);
+   eldbus_message_iter_basic_append(st, 'i', shuffle);
+   eldbus_message_iter_basic_append(st, 'i', repeat);
+   eldbus_message_iter_basic_append(st, 'i', endless);
+   eldbus_message_iter_container_close(main_iter, st);
 
-   edbus_service_signal_send(player, sig);
+   eldbus_service_signal_send(player, sig);
 }
 
 static void
@@ -510,10 +510,10 @@ _mpris_signal_player_track_change(const Song *song)
    static const void *old_song = NULL;
    if (old_song != song)
      {
-        EDBus_Message *sig = edbus_service_signal_new(player, PLAYER_TRACK);
+        Eldbus_Message *sig = eldbus_service_signal_new(player, PLAYER_TRACK);
         if (!sig) return;
         _mpris_message_fill_song_metadata(sig, song);
-        edbus_service_signal_send(player, sig);
+        eldbus_service_signal_send(player, sig);
         old_song = song;
      }
 }
@@ -522,103 +522,103 @@ static void
 _mpris_signal_tracklist_tracklist_change(int size)
 {
    int32_t size32 = size;
-   edbus_service_signal_emit(tracklist, TRACK_LIST, size32);
+   eldbus_service_signal_emit(tracklist, TRACK_LIST, size32);
 }
 
-static EDBus_Message *
-_mpris_player_next(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_next(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    enjoy_control_next();
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_previous(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_previous(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    enjoy_control_previous();
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_pause(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_pause(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    enjoy_control_pause();
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_stop(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_stop(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    enjoy_control_stop();
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_play(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_play(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    Enjoy_Player_Status status = enjoy_player_status_get();
    if (!status.playback)
      enjoy_position_set(0);
    enjoy_control_play();
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_seek(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_seek(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    int64_t position;
-   if (!edbus_message_arguments_get(msg, "x", &position))
+   if (!eldbus_message_arguments_get(msg, "x", &position))
      goto end;
    enjoy_control_seek(position);
 end:
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_root_identity(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_root_identity(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    const char *identity = PACKAGE_STRING;
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
-   edbus_message_arguments_append(reply, "s", identity);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
+   eldbus_message_arguments_append(reply, "s", identity);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_root_quit(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_root_quit(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    enjoy_quit();
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_root_version(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_root_version(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
-   EDBus_Message_Iter *main_iter, *s;
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
+   Eldbus_Message_Iter *main_iter, *s;
    uint16_t v1 = 1, v2 = 0;
 
-   main_iter = edbus_message_iter_get(reply);
-   edbus_message_iter_arguments_append(main_iter, "(qq)", &s);
-   edbus_message_iter_arguments_append(s, "qq", v1, v2);
-   edbus_message_iter_container_close(main_iter, s);
+   main_iter = eldbus_message_iter_get(reply);
+   eldbus_message_iter_arguments_append(main_iter, "(qq)", &s);
+   eldbus_message_iter_arguments_append(s, "qq", v1, v2);
+   eldbus_message_iter_container_close(main_iter, s);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_player_caps_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_caps_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    int32_t bits = _caps_to_mpris_bits(enjoy_player_caps_get());
-   edbus_message_arguments_append(reply, "i", bits);
+   eldbus_message_arguments_append(reply, "i", bits);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_player_volume_set(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_volume_set(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    int volume;
 
-   if (!edbus_message_arguments_get(msg, "i", &volume))
+   if (!eldbus_message_arguments_get(msg, "i", &volume))
      goto end;
    if (volume > 100)
      volume = 100;
@@ -626,35 +626,35 @@ _mpris_player_volume_set(const EDBus_Service_Interface *iface __UNUSED__, const 
      volume = 0;
    enjoy_volume_set(volume);
 end:
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_volume_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_volume_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    int32_t vol = enjoy_volume_get();
-   edbus_message_arguments_append(reply, "i", vol);
+   eldbus_message_arguments_append(reply, "i", vol);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_player_repeat_set(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_repeat_set(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    Eina_Bool repeat;
-   if (!edbus_message_arguments_get(msg, "b", &repeat))
+   if (!eldbus_message_arguments_get(msg, "b", &repeat))
      goto end;
    enjoy_control_loop_set(repeat);
 end:
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_status_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_status_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    Enjoy_Player_Status status = enjoy_player_status_get();
-   EDBus_Message_Iter *main_iter, *st;
+   Eldbus_Message_Iter *main_iter, *st;
    int32_t p, s, r, e;
 
    p = status.playback;
@@ -662,88 +662,88 @@ _mpris_player_status_get(const EDBus_Service_Interface *iface __UNUSED__, const 
    r = status.repeat;
    e = status.endless;
 
-   main_iter = edbus_message_iter_get(reply);
-   edbus_message_iter_arguments_append(main_iter, "(iiii)", &st);
-   edbus_message_iter_arguments_append(st, "iiii", p, s, r, e);
-   edbus_message_iter_container_close(main_iter, st);
+   main_iter = eldbus_message_iter_get(reply);
+   eldbus_message_iter_arguments_append(main_iter, "(iiii)", &st);
+   eldbus_message_iter_arguments_append(st, "iiii", p, s, r, e);
+   eldbus_message_iter_container_close(main_iter, st);
 
    return reply;
 }
 
-static EDBus_Message *
-_mpris_player_position_set(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_position_set(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    int position;
-   if (!edbus_message_arguments_get(msg, "i", &position))
+   if (!eldbus_message_arguments_get(msg, "i", &position))
      goto end;
    enjoy_position_set(position);
 end:
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
-static EDBus_Message *
-_mpris_player_position_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_position_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    int32_t pos = enjoy_position_get();
-   edbus_message_arguments_append(reply, "i", pos);
+   eldbus_message_arguments_append(reply, "i", pos);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_song_metadata_reply(const EDBus_Message *msg, const Song *song)
+static Eldbus_Message *
+_mpris_song_metadata_reply(const Eldbus_Message *msg, const Song *song)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    _mpris_message_fill_song_metadata(reply, song);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_player_metadata_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_player_metadata_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    return _mpris_song_metadata_reply(msg, enjoy_song_current_get());
 }
 
-static EDBus_Message *
-_mpris_tracklist_current_track_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_tracklist_current_track_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    int32_t pos = enjoy_playlist_current_position_get();
-   edbus_message_arguments_append(reply, "i", pos);
+   eldbus_message_arguments_append(reply, "i", pos);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_tracklist_count(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_tracklist_count(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply = edbus_message_method_return_new(msg);
+   Eldbus_Message *reply = eldbus_message_method_return_new(msg);
    int32_t count = enjoy_playlist_count();
-   edbus_message_arguments_append(reply, "i", count);
+   eldbus_message_arguments_append(reply, "i", count);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_tracklist_metadata_get(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_tracklist_metadata_get(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
-   EDBus_Message *reply;
+   Eldbus_Message *reply;
    const Song *song;
    int position;
-   if (!edbus_message_arguments_get(msg, "i", &position))
+   if (!eldbus_message_arguments_get(msg, "i", &position))
      return NULL;
    song = enjoy_playlist_song_position_get(position);
    reply = _mpris_song_metadata_reply(msg, song);
    return reply;
 }
 
-static EDBus_Message *
-_mpris_tracklist_shuffle_set(const EDBus_Service_Interface *iface __UNUSED__, const EDBus_Message *msg)
+static Eldbus_Message *
+_mpris_tracklist_shuffle_set(const Eldbus_Service_Interface *iface __UNUSED__, const Eldbus_Message *msg)
 {
    Eina_Bool param;
-   if (!edbus_message_arguments_get(msg, "b", &param))
+   if (!eldbus_message_arguments_get(msg, "b", &param))
      goto end;
    enjoy_control_shuffle_set(param);
 end:
-   return edbus_message_method_return_new(msg);
+   return eldbus_message_method_return_new(msg);
 }
 
 EINA_MODULE_INIT(mpris_init);

@@ -7,12 +7,12 @@ INCLUDES = \
 -DLIBRARY_DIR=\"$(libdir)\" \
 -DGETTEXT_PACKAGE=\"$(PACKAGE)\" \
 -DLOCALEDIR=\"$(localedir)\" \
-@EDBUS_CFLAGS@ \
+@ELDBUS_CFLAGS@ \
 @EFL_CFLAGS@
 
 pkgdir = $(libdir)/enjoy
 pkg_LTLIBRARIES = fso.la
 fso_la_SOURCES = fso.c
-fso_la_LIBADD = @EDBUS_LIBS@
+fso_la_LIBADD = @ELDBUS_LIBS@
 fso_la_LDFLAGS = -no-undefined -module -avoid-version
 fso_la_LIBTOOLFLAGS = --tag=disable-static

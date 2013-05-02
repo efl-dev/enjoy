@@ -8,7 +8,7 @@
 
 #include <Ecore_Getopt.h>
 #include <Ecore_File.h>
-#include <EDBus.h>
+#include <Eldbus.h>
 #include <stdlib.h>
 #include <string.h>
 #include "gettext.h"

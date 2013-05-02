@@ -1,5 +1,5 @@
 #include <Eina.h>
-#include <EDBus.h>
+#include <Eldbus.h>
 #include <Ecore.h>
 #include "plugin.h"
 
@@ -31,8 +31,8 @@ static int _fso_log_domain = -1;
 #define FSO_OUSAGED_OBJECT_PATH "/org/freesmartphone/Usage"
 #define FSO_OUSAGED_INTERFACE "org.freesmartphone.Usage"
 
-static EDBus_Connection *conn = NULL;
-static EDBus_Proxy *proxy = NULL;
+static Eldbus_Connection *conn = NULL;
+static Eldbus_Proxy *proxy = NULL;
 
 typedef struct _FSO_Cb_Data
 {
@@ -41,7 +41,7 @@ typedef struct _FSO_Cb_Data
 } FSO_Cb_Data;
 
 static void
-fso_request_resource_cb(void *data, const EDBus_Message *msg, EDBus_Pending *pending)
+fso_request_resource_cb(void *data, const Eldbus_Message *msg, Eldbus_Pending *pending)
 {
    FSO_Cb_Data *d = data;
    Eina_Bool e = EINA_FALSE;
@@ -49,7 +49,7 @@ fso_request_resource_cb(void *data, const EDBus_Message *msg, EDBus_Pending *pen
 
    DBG("Request sent to fsousaged to enable resource.");
 
-   if (edbus_message_error_get(msg, &error_name, &error_txt))
+   if (eldbus_message_error_get(msg, &error_name, &error_txt))
      {
         ERR("Error requesting FSO resource: %s - %s", error_name, error_txt);
         e = EINA_TRUE;
@@ -61,7 +61,7 @@ fso_request_resource_cb(void *data, const EDBus_Message *msg, EDBus_Pending *pen
 }
 
 static void
-fso_release_resource_cb(void *data, const EDBus_Message *msg, EDBus_Pending *pending)
+fso_release_resource_cb(void *data, const Eldbus_Message *msg, Eldbus_Pending *pending)
 {
    FSO_Cb_Data *d = data;
    Eina_Bool e = EINA_FALSE;
@@ -69,7 +69,7 @@ fso_release_resource_cb(void *data, const EDBus_Message *msg, EDBus_Pending *pen
 
    DBG("Request sent to fsousaged to disable resource.");
 
-   if (edbus_message_error_get(msg, &error_name, &error_txt))
+   if (eldbus_message_error_get(msg, &error_name, &error_txt))
      {
         ERR("Error releasing FSO resource: %s - %s", error_name, error_txt);
         e = EINA_TRUE;
@@ -95,7 +95,7 @@ fso_request_resource(const char *resource, void (*func)(void *data, Eina_Bool er
              d->data = (void *)data;
           }
      }
-   edbus_proxy_call(proxy, "RequestResource", fso_request_resource_cb, d, -1,
+   eldbus_proxy_call(proxy, "RequestResource", fso_request_resource_cb, d, -1,
                     "s", resource);
 }
 
@@ -115,7 +115,7 @@ fso_release_resource(const char *resource, void (*func)(void *data, Eina_Bool er
              d->data = (void *)data;
           }
      }
-   edbus_proxy_call(proxy, "RequestResource", fso_release_resource_cb, d, -1,
+   eldbus_proxy_call(proxy, "RequestResource", fso_release_resource_cb, d, -1,
                     "s", resource);
 }
 
@@ -149,7 +149,7 @@ static const Enjoy_Plugin_Api api = {
 static Eina_Bool
 fso_init(void)
 {
-   EDBus_Object *obj;
+   Eldbus_Object *obj;
    if (_fso_log_domain < 0)
      {
         _fso_log_domain = eina_log_domain_register
@@ -170,15 +170,15 @@ fso_init(void)
 
    if (conn) return EINA_TRUE;
 
-   edbus_init();
-   conn = edbus_connection_get(EDBUS_CONNECTION_TYPE_SYSTEM);
+   eldbus_init();
+   conn = eldbus_connection_get(ELDBUS_CONNECTION_TYPE_SYSTEM);
    if (!conn)
      {
         ERR("Could not get DBus session bus");
         goto error;
      }
-   obj = edbus_object_get(conn, FSO_OUSAGED_SERVICE, FSO_OUSAGED_OBJECT_PATH);
-   proxy = edbus_proxy_get(obj, FSO_OUSAGED_INTERFACE);
+   obj = eldbus_object_get(conn, FSO_OUSAGED_SERVICE, FSO_OUSAGED_OBJECT_PATH);
+   proxy = eldbus_proxy_get(obj, FSO_OUSAGED_INTERFACE);
 
    enjoy_plugin_register("sys/fso", &api, ENJOY_PLUGIN_PRIORITY_NORMAL);
 
@@ -193,14 +193,14 @@ fso_init(void)
 static void
 fso_shutdown(void)
 {
-   EDBus_Object *obj;
+   Eldbus_Object *obj;
    if (!conn) return;
 
-   obj = edbus_proxy_object_get(proxy);
-   edbus_proxy_unref(proxy);
-   edbus_object_unref(obj);
-   edbus_connection_unref(conn);
-   edbus_shutdown();
+   obj = eldbus_proxy_object_get(proxy);
+   eldbus_proxy_unref(proxy);
+   eldbus_object_unref(obj);
+   eldbus_connection_unref(conn);
+   eldbus_shutdown();
    conn = NULL;
    if (_fso_log_domain >= 0)
      {
