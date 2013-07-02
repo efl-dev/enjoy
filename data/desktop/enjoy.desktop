@@ -1,6 +1,5 @@
 [Desktop Entry]
-Name=Enjoy
-Name[eo]=Ĝuu
+Categories=Application;AudioVideo;Audio;Player;
 Comment=Music Player
 Comment[eo]=Muzikludilo
 Comment[es]=Reproductor de música
@@ -8,8 +7,11 @@ Comment[fr]=Lecteur de musique
 Comment[gl]=Reprodutor de música
 Comment[it]=Riproduttore musicale
 Comment[pt]=Reprodutor de músicas
+Encoding=UTF-8
 Exec=enjoy
 Icon=enjoy
+Name=Enjoy
+Name[eo]=Ĝuu
+Name[fr]=Enjoy
 Terminal=false
 Type=Application
-Categories=Application;AudioVideo;Audio;Player;
