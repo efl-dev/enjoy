@@ -111,8 +111,8 @@ preferences_item_selected(void *data, Evas_Object *lst, void *event_info)
    Enjoy_Preferences_Plugin *p = data;
    Elm_Object_Item *glit = event_info;
    Elm_Object_Item *oi;
-   Evas_Object *group = elm_object_parent_widget_get(lst);
-   Evas_Object *naviframe = elm_object_parent_widget_get(group);
+   Evas_Object *layout = elm_object_parent_widget_get(lst);
+   Evas_Object *naviframe = elm_object_parent_widget_get(layout);
    Evas_Object *prev_btn = NULL, *next_btn = NULL, *content = NULL;
    Eina_Bool old_auto_prev_btn, auto_prev_btn = EINA_TRUE;
 

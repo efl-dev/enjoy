@@ -3,6 +3,7 @@
 struct db_folder_add_ctx
 {
    Evas_Object *status, *frame, *box, *button;
+   Evas_Object *pb;
    Elm_Object_Item *page;
    unsigned int errors, processed;
    char *path;
@@ -39,6 +40,8 @@ _lms_progress(lms_t *lms __UNUSED__, const char *path, int path_len __UNUSED__, 
    struct db_folder_add_ctx *ctx = data;
    DBG("status=%d '%s'", status, path);
 
+   elm_progressbar_pulse(ctx->pb, EINA_TRUE);
+
    /* lazy: no need to lock, only this thread writes, the other just reads */
    if (status == LMS_PROGRESS_STATUS_UP_TO_DATE ||
        status == LMS_PROGRESS_STATUS_PROCESSED)
@@ -62,7 +65,7 @@ static void
 preferences_db_folder_add_dismiss(void *data, Evas_Object *o __UNUSED__, void *event_info __UNUSED__)
 {
    struct db_folder_add_ctx *ctx = data;
-
+   elm_progressbar_pulse(ctx->pb, EINA_FALSE);
    evas_object_event_callback_del_full
      (ctx->status, EVAS_CALLBACK_DEL, _lms_scan_abort, ctx);
 
@@ -84,7 +87,7 @@ _lms_scan_finish(struct db_folder_add_ctx *ctx, Eina_Bool success)
    char buf[1024];
 
    INF("Finished scanning with %s", success ? "success" : "interruptions");
-
+   elm_progressbar_pulse(ctx->pb, EINA_FALSE);
    ctx->thread = NULL;
    if (!ctx->status) goto end; /* object deleted */
 
@@ -133,6 +136,7 @@ _lms_scan_abort(void *data, Evas *e __UNUSED__, Evas_Object *o __UNUSED__, void 
    if (!ctx->thread) return;
    WRN("Canceling scanner thread!");
    ctx->canceled = EINA_TRUE;
+   elm_progressbar_pulse(ctx->pb, EINA_FALSE);
    lms_stop_processing(ctx->lms);
    ecore_thread_cancel(ctx->thread);
    ctx->status = NULL;
@@ -166,8 +170,9 @@ preferences_db_folder_add_do(void *data, Evas_Object *o __UNUSED__, void *event_
 {
    Evas_Object *fs = data;
    Evas_Object *box = elm_object_parent_widget_get(fs);
-   Evas_Object *frame = elm_object_parent_widget_get(box);
-   Evas_Object *bt;
+   Evas_Object *layout = elm_object_parent_widget_get(box);
+   Evas_Object *frame = elm_object_parent_widget_get(layout);
+   Evas_Object *bt, *pb;
    const char *path = elm_fileselector_path_get(fs);
    struct stat st;
    struct db_folder_add_ctx *ctx;
@@ -212,8 +217,8 @@ preferences_db_folder_add_do(void *data, Evas_Object *o __UNUSED__, void *event_
      }
 
    enjoy_lms_charsets_add(ctx->lms);
-
    enjoy_db_stop_usage();
+
    ctx->box = box = elm_box_add(frame);
    ctx->frame = frame;
    ctx->status = elm_label_add(box);
@@ -222,11 +227,21 @@ preferences_db_folder_add_do(void *data, Evas_Object *o __UNUSED__, void *event_
    evas_object_show(ctx->status);
    elm_box_pack_end(box, ctx->status);
 
+   pb = elm_progressbar_add(box);
+   elm_object_style_set(pb, "wheel");
+   elm_progressbar_pulse_set(pb, EINA_TRUE);
+   evas_object_size_hint_align_set(pb, EVAS_HINT_FILL, 0.5);
+   evas_object_size_hint_weight_set(pb, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   elm_box_pack_end(box, pb);
+   ctx->pb = pb;
+   evas_object_show(pb);
+
    ctx->button = bt = elm_button_add(box);
    elm_object_text_set(bt, "Stop scanning");
    evas_object_size_hint_align_set(bt, -1.0, 0.5);
    evas_object_show(bt);
    elm_box_pack_end(box, bt);
+   evas_object_show(box);
    evas_object_smart_callback_add
      (bt, "clicked", preferences_db_folder_add_stop, ctx);
 
@@ -235,9 +250,7 @@ preferences_db_folder_add_do(void *data, Evas_Object *o __UNUSED__, void *event_
    ctx->page = elm_naviframe_item_push
      (frame, "Importing Music", NULL, NULL, box, NULL);
    elm_naviframe_prev_btn_auto_pushed_set(frame, prev_btn_auto_pushed);
-
    ctx->path = strdup(path);
-
    ctx->thread = ecore_thread_run
      (_lms_scan, _lms_scan_end, _lms_scan_cancel, ctx);
    if (!ctx->thread)
@@ -276,7 +289,7 @@ preferences_db_folder_add_label_get(Enjoy_Preferences_Plugin *p __UNUSED__)
 static Eina_Bool
 preferences_db_folder_add_activate(Enjoy_Preferences_Plugin *p __UNUSED__, Evas_Object *naviframe, Evas_Object **prev_btn __UNUSED__, Evas_Object **next_btn __UNUSED__, Evas_Object **content, Eina_Bool *auto_prev_btn __UNUSED__)
 {
-   Evas_Object *box, *fs, *bt;
+   Evas_Object *box, *fs, *bt, *pb;
    char path[PATH_MAX];
 
    box = elm_box_add(naviframe);
