@@ -9,7 +9,7 @@ preferences_db_clear_do(void *data, Evas_Object *o __UNUSED__, void *event_info 
 }
 
 static const char *
-preferences_db_clear_categegory_get(Enjoy_Preferences_Plugin *p __UNUSED__)
+preferences_db_clear_category_get(Enjoy_Preferences_Plugin *p __UNUSED__)
 {
    return "Database";
 }
@@ -46,7 +46,7 @@ preferences_db_clear_register(void)
 {
    static const Enjoy_Preferences_Plugin_Api api = {
      ENJOY_PREFERENCES_PLUGIN_API_VERSION,
-     preferences_db_clear_categegory_get,
+     preferences_db_clear_category_get,
      preferences_db_clear_label_get,
      preferences_db_clear_activate
    };

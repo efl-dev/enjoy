@@ -193,7 +193,7 @@ preferences_cover_local_search_do(void *data, Evas_Object *o __UNUSED__, void *e
 }
 
 static const char *
-preferences_cover_local_search_categegory_get(Enjoy_Preferences_Plugin *p __UNUSED__)
+preferences_cover_local_search_category_get(Enjoy_Preferences_Plugin *p __UNUSED__)
 {
    return "Album Arts";
 }
@@ -236,7 +236,7 @@ preferences_cover_local_search_register(void)
 {
    static const Enjoy_Preferences_Plugin_Api api = {
      ENJOY_PREFERENCES_PLUGIN_API_VERSION,
-     preferences_cover_local_search_categegory_get,
+     preferences_cover_local_search_category_get,
      preferences_cover_local_search_label_get,
      preferences_cover_local_search_activate
    };

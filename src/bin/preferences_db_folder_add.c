@@ -262,7 +262,7 @@ preferences_db_folder_add_do(void *data, Evas_Object *o __UNUSED__, void *event_
 }
 
 static const char *
-preferences_db_folder_add_categegory_get(Enjoy_Preferences_Plugin *p __UNUSED__)
+preferences_db_folder_add_category_get(Enjoy_Preferences_Plugin *p __UNUSED__)
 {
    return "Database";
 }
@@ -313,7 +313,7 @@ preferences_db_folder_add_register(void)
 {
    static const Enjoy_Preferences_Plugin_Api api = {
      ENJOY_PREFERENCES_PLUGIN_API_VERSION,
-     preferences_db_folder_add_categegory_get,
+     preferences_db_folder_add_category_get,
      preferences_db_folder_add_label_get,
      preferences_db_folder_add_activate
    };

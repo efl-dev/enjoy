@@ -144,7 +144,7 @@ preferences_cover_clear_do(void *data, Evas_Object *o __UNUSED__, void *event_in
 }
 
 static const char *
-preferences_cover_clear_categegory_get(Enjoy_Preferences_Plugin *p __UNUSED__)
+preferences_cover_clear_category_get(Enjoy_Preferences_Plugin *p __UNUSED__)
 {
    return "Album Arts";
 }
@@ -181,7 +181,7 @@ preferences_cover_clear_register(void)
 {
    static const Enjoy_Preferences_Plugin_Api api = {
      ENJOY_PREFERENCES_PLUGIN_API_VERSION,
-     preferences_cover_clear_categegory_get,
+     preferences_cover_clear_category_get,
      preferences_cover_clear_label_get,
      preferences_cover_clear_activate
    };
