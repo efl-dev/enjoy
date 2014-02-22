@@ -907,7 +907,7 @@ win_new(App *app)
 {
    Win *w = &_win;
    const char *s;
-   Evas_Coord iw = 320, ih = 240;
+   Evas_Coord iw = 480, ih = 320;
    char path[PATH_MAX];
    Evas_Object *nowplaying_edje;
 

@@ -168,7 +168,7 @@ preferences_db_folder_add_do(void *data, Evas_Object *o __UNUSED__, void *event_
    Evas_Object *box = elm_object_parent_widget_get(fs);
    Evas_Object *frame = elm_object_parent_widget_get(box);
    Evas_Object *bt;
-   const char *path = elm_fileselector_entry_path_get(fs);
+   const char *path = elm_fileselector_path_get(fs);
    struct stat st;
    struct db_folder_add_ctx *ctx;
    Eina_Bool prev_btn_auto_pushed;
@@ -280,23 +280,24 @@ preferences_db_folder_add_activate(Enjoy_Preferences_Plugin *p __UNUSED__, Evas_
    char path[PATH_MAX];
 
    box = elm_box_add(naviframe);
+   evas_object_size_hint_weight_set(box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(box, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
    fs = elm_fileselector_entry_add(box);
+   elm_fileselector_entry_inwin_mode_set(fs, EINA_TRUE);
    /* TODO: efreet should use xdg-user-dirs */
    snprintf(path, sizeof(path), "%s/Music", getenv("HOME"));
    if (access(path, F_OK|X_OK) == 0)
-     elm_fileselector_entry_path_set(fs, path);
+     elm_fileselector_path_set(fs, path);
    else
-     elm_fileselector_entry_path_set(fs, getenv("HOME"));
-   elm_fileselector_entry_folder_only_set(fs, EINA_TRUE);
+     elm_fileselector_path_set(fs, getenv("HOME"));
+   elm_fileselector_folder_only_set(fs, EINA_TRUE);
    elm_object_text_set(fs, "Choose...");
-   evas_object_size_hint_align_set(fs, -1.0, 0.5);
    evas_object_show(fs);
    elm_box_pack_end(box, fs);
 
    bt = elm_button_add(box);
    elm_object_text_set(bt, "Import music from folder");
-   evas_object_size_hint_align_set(bt, -1.0, 0.5);
    evas_object_show(bt);
    elm_box_pack_end(box, bt);
 

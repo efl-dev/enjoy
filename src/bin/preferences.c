@@ -111,7 +111,8 @@ preferences_item_selected(void *data, Evas_Object *lst, void *event_info)
    Enjoy_Preferences_Plugin *p = data;
    Elm_Object_Item *glit = event_info;
    Elm_Object_Item *oi;
-   Evas_Object *naviframe = elm_object_parent_widget_get(lst);
+   Evas_Object *group = elm_object_parent_widget_get(lst);
+   Evas_Object *naviframe = elm_object_parent_widget_get(group);
    Evas_Object *prev_btn = NULL, *next_btn = NULL, *content = NULL;
    Eina_Bool old_auto_prev_btn, auto_prev_btn = EINA_TRUE;
 
@@ -160,9 +161,9 @@ preferences_item_add(Preferences *prefs, Enjoy_Preferences_Plugin *p)
         memcpy(cat->name, catname, catnamelen);
         eina_hash_add(prefs->categories, cat->name, cat);
 
-        cat->glit = elm_genlist_item_sorted_insert
+        cat->glit = elm_genlist_item_append
           (prefs->list, &preferences_itc_category, cat, NULL,
-           ELM_GENLIST_ITEM_NONE, preferences_category_cmp, NULL, NULL);
+           ELM_GENLIST_ITEM_GROUP, NULL, NULL);
 
         elm_genlist_item_select_mode_set(cat->glit, ELM_OBJECT_SELECT_MODE_DISPLAY_ONLY);
      }
@@ -171,9 +172,9 @@ preferences_item_add(Preferences *prefs, Enjoy_Preferences_Plugin *p)
 
    cat->items++;
    p->cat = cat;
-   p->glit = elm_genlist_item_sorted_insert
+   p->glit = elm_genlist_item_append
      (prefs->list, &preferences_itc_item, p, cat->glit,
-      ELM_GENLIST_ITEM_NONE, preferences_item_cmp,
+      ELM_GENLIST_ITEM_NONE,
       preferences_item_selected, p);
 
    DBG("plugin %p item %p cat %p (%s)", p, p->glit, cat, cat->name);
