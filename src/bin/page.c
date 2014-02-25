@@ -145,6 +145,13 @@ struct _Page
     }                                                           \
   while (0)
 
+static void
+_page_index_changed(void *data __UNUSED__, Evas_Object *o __UNUSED__, void *event_info)
+{
+   Elm_Object_Item *glit = data;
+   elm_genlist_item_bring_in(glit, ELM_GENLIST_ITEM_SCROLLTO_TOP);
+}
+
 static DB *
 _page_db_get(const Evas_Object *obj)
 {
@@ -190,22 +197,22 @@ _page_populate(void *data)
             (isalpha(letter) && (page->last_index_letter[0] != letter)))
           {
              if ((page->first) && (!page->last_index_letter[0]))
-               elm_index_item_append(page->index, "Special", NULL, page->first);
+               elm_index_item_append(page->index, "Special", _page_index_changed, page->first);
 
              page->last_index_letter[0] = letter;
-             elm_index_item_append(page->index, page->last_index_letter, NULL, glit);
+             elm_index_item_append(page->index, page->last_index_letter, _page_index_changed, glit);
           }
         if (!page->first) page->first = glit;
         eina_hash_set(page->od_to_list_item, od, glit);
         page->num_elements++;
      }
-
+   elm_index_level_go(page->index, 0);
    return EINA_TRUE;
 
  end:
    if (cls->after_populate)
      cls->after_populate(page);
-
+   elm_index_level_go(page->index, 0);
    page->populate = NULL;
    return EINA_FALSE;
 }
@@ -218,13 +225,6 @@ _page_selected(void *data, Evas_Object *o, void *event_info)
    if (page->selected == glit) return;
    page->selected = glit;
    page->cls->selected(data, o, event_info);
-}
-
-static void
-_page_index_changed(void *data __UNUSED__, Evas_Object *o __UNUSED__, void *event_info)
-{
-   Elm_Object_Item *glit = event_info;
-   elm_genlist_item_bring_in(glit, ELM_GENLIST_ITEM_SCROLLTO_TOP);
 }
 
 static void
@@ -243,6 +243,7 @@ static void
 _page_action_back(void *data, Evas_Object *obj __UNUSED__, const char *emission __UNUSED__, const char *source __UNUSED__)
 {
    Page *page = data;
+   INF("Pressed Back");
    evas_object_smart_callback_call(page->layout, "back", page->layout);
 }
 
@@ -337,8 +338,8 @@ _page_add(Evas_Object *parent, void *model, Eina_Iterator *it, const char *title
    if (edje_object_part_exists(page->edje_list, "ejy.swallow.index"))
      {
         page->index = elm_index_add(obj_list);
-        evas_object_smart_callback_add
-          (page->index, "delay,changed", _page_index_changed, page);
+        /*evas_object_smart_callback_add
+          (page->index, "delay,changed", _page_index_changed, page);*/
         elm_object_part_content_set(obj_list, "ejy.swallow.index", page->index);
      }
 
