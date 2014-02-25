@@ -937,7 +937,7 @@ win_new(App *app)
    w->emotion = emotion_object_add(evas_object_evas_get(w->win));
    if (!emotion_object_init(w->emotion, NULL))
      {
-        CRITICAL("could not create emotion engine");
+        CRITICAL("could not create emotion engine : please ensure you have emotion_generic_players and emotion");
         goto error;
      }
    emotion_object_video_mute_set(w->emotion, EINA_TRUE);
