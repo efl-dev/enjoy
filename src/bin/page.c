@@ -7,7 +7,7 @@
  * TODO:
  *  - create page_folder that contains something other than songs, click one
  *    should create a new page, stack it into the parent list and recurse.
- *  - add suffle action for page_songs
+ *  - add shuffle action for page_songs
  */
 
 /* number of songs to populate at once before going back to mainloop */
@@ -347,10 +347,13 @@ _page_add(Evas_Object *parent, void *model, Eina_Iterator *it, const char *title
    elm_object_part_content_set(page->layout, "elm.swallow.content", page->layout_list);
    edje_object_part_text_set(page->edje,
                              "elm.text.title", page->title);
-   edje_object_signal_callback_add(page->edje, "elm,action,back", "",
+
+   edje_object_signal_callback_add(page->edje, "clicked", "back",
                                    _page_action_back, page);
-   edje_object_signal_callback_add(page->edje, "elm,action,next", "",
+   edje_object_signal_callback_add(page->edje, "clicked", "next",
                                    _page_action_next, page);
+
+
    param.type = EDJE_EXTERNAL_PARAM_TYPE_STRING;
    param.name = "label";
    param.s = "Playing";
