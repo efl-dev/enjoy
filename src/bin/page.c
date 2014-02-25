@@ -200,12 +200,13 @@ _page_populate(void *data)
         page->num_elements++;
      }
 
+   elm_index_level_go(page->index, 0);
    return EINA_TRUE;
 
  end:
    if (cls->after_populate)
      cls->after_populate(page);
-
+   elm_index_level_go(page->index, 0);
    page->populate = NULL;
    return EINA_FALSE;
 }
@@ -223,7 +224,7 @@ _page_selected(void *data, Evas_Object *o, void *event_info)
 static void
 _page_index_changed(void *data __UNUSED__, Evas_Object *o __UNUSED__, void *event_info)
 {
-   Elm_Object_Item *glit = event_info;
+   Elm_Object_Item *glit = elm_object_item_data_get(event_info);
    elm_genlist_item_bring_in(glit, ELM_GENLIST_ITEM_SCROLLTO_TOP);
 }
 
