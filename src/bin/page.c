@@ -338,6 +338,7 @@ _page_add(Evas_Object *parent, void *model, Eina_Iterator *it, const char *title
    if (edje_object_part_exists(page->edje_list, "ejy.swallow.index"))
      {
         page->index = elm_index_add(obj_list);
+        elm_index_horizontal_set(page->index, EINA_TRUE);
         evas_object_smart_callback_add
           (page->index, "delay,changed", _page_index_changed, page);
         elm_object_part_content_set(obj_list, "ejy.swallow.index", page->index);
