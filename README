@@ -5,7 +5,7 @@ Libraries (EFL) with focus on speed and mobile usability, yet should
 be usable on desktops as well.
 
 Enjoy is modeled around a media database constructed by
-LightMediaScanner, it is not meant to play single files from disk,
+LightMediaScanner [1] [2], it is not meant to play single files from disk,
 instead it will recursively index directories for music files and then
 list them by artist, album, genre and so on. Playlists are also
 supported, as well as random or filter playlists can be dynamically
@@ -14,3 +14,6 @@ generated.
 
 See INSTALL for help on how to install.
 See COPYING for software usage, modification and redistribution license.
+
+[1] http://lms.garage.maemo.org/
+[2] https://github.com/profusion/lightmediascanner
